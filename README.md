@@ -77,15 +77,16 @@ The session token may expire. If a call fails because the session is no longer v
 | # | Shadow key | Description | Unit | Typical operating range / values | Access |
 | --- | --- | --- | --- | --- | --- |
 | 1 | `poolTemp` | Current pool water temperature | °C | 10–40 | read-only |
-| 2 | `pH` | Current pool water pH level | pH | 7–8 | read-only |
-| 3 | `orp` | Oxidation-reduction potential (ORP) of the pool water | mV | 100–800 | read-only |
-| 4 | `freeCl` | Free chlorine concentration | ppm | 0.0–2.0 | read-only |
-| 5 | `heaterStatePercent` | Current heater/cooler output level | % | 0–100 | read-only |
-| 6 | `heaterMode` | Current heater operating mode | enum | `HEATING`, `COOLING` | read-only |
-| 7 | `filtrationState` | Filtration pump state | boolean | `true`, `false` | **read/write** |
-| 8 | `poolWaterLevel` | Current pool water level | m | 0–1.5 | read-only |
-| 9 | `dosingPumpARemainingAgentVolume` | Remaining volume of pH-reducing agent | L | 0–60 | **read/write** |
-| 10 | `dosingPumpBRemainingAgentVolume` | Remaining volume of chlorinating agent (NaClO) | L | 0–60 | **read/write** |
+| 2 | `targetTemp` | Target pool water temperature | °C | 10–40 | **read/write** |
+| 3 | `pH` | Current pool water pH level | pH | 7–8 | read-only |
+| 4 | `orp` | Oxidation-reduction potential (ORP) of the pool water | mV | 100–800 | read-only |
+| 5 | `freeCl` | Free chlorine concentration | ppm | 0.0–2.0 | read-only |
+| 6 | `heaterStatePercent` | Current heater/cooler output level | % | 0–100 | read-only |
+| 7 | `heaterMode` | Current heater operating mode | enum | `HEATING`, `COOLING` | read-only |
+| 8 | `filtrationState` | Filtration pump state | boolean | `true`, `false` | **read/write** |
+| 9 | `poolWaterLevel` | Current pool water level | m | 0–1.5 | read-only |
+| 10 | `dosingPumpARemainingAgentVolume` | Remaining volume of pH-reducing agent | L | 0–60 | **read/write** |
+| 11 | `dosingPumpBRemainingAgentVolume` | Remaining volume of chlorinating agent (NaClO) | L | 0–60 | **read/write** |
 
 The ranges shown above represent typical operating ranges rather than strict API limits. Values outside these ranges may still be reported by the Pool Controller.
 
