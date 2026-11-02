@@ -87,8 +87,8 @@ The session token may expire. If a call fails because the session is no longer v
 | 7 | `heaterMode` | Current heater operating mode (the dashboard uses it only in icon/label rules, not as a tile value) | enum | – | `HEATING`, `COOLING`, `STANDBY` | read-only |
 | 8 | `filtrationState` | Filtration pump state | boolean | – | `true`, `false` | **read/write** |
 | 9 | `poolWaterLevel` | Current pool water level | number | m | 0–1.5 | read-only |
-| 10 | `dosingPumpARemainingAgentVolume` | Remaining volume of pH-reducing agent | number | L | 0–60 | **read/write** |
-| 11 | `dosingPumpBRemainingAgentVolume` | Remaining volume of chlorinating agent (NaClO) | number | L | 0–60 | **read/write** |
+| 10 | `dosingPumpARemainingAgentVolume` | Remaining volume of agent in dosing pump A (e.g. pH-reducing agent) | number | L | 0–60 | **read/write** |
+| 11 | `dosingPumpBRemainingAgentVolume` | Remaining volume of agent in dosing pump B (e.g. chlorinating agent) | number | L | 0–60 | **read/write** |
 | 12 | `dosingPumpCRemainingAgentVolume` | Remaining volume of agent in dosing pump C | number | L | 0–60 | **read/write** |
 | 13 | `dosingPumpDRemainingAgentVolume` | Remaining volume of agent in dosing pump D | number | L | 0–60 | **read/write** |
 | 14 | `ambientTemperature` | Ambient air temperature (shown only with the `displayAmbientTemperature` eligibility) | number | °C | – | read-only |
@@ -107,9 +107,12 @@ The session token may expire. If a call fails because the session is no longer v
 | 27 | `startCoolingTemp` | Water temperature at which cooling starts | number | °C | 20–36 (step 0.5) | **read/write** |
 | 28 | `heaterMaxPowerLevel` | Maximum heater power level | enum | – | `SILENT`, `NORMAL`, `BOOST` *(only in some configurations)* | **read/write** |
 | 29 | `waterRefill` | Automatic water refill | enum | – | `DISABLED`, `ENABLED` | **read/write** |
-| 30 | `aux0State` … `aux7State` | State of auxiliary output 0–7 (8 keys). The tile label depends on the output type: lighting, RGB lighting, attraction, auxiliary circulation pump, bubble bath, fountain, jet stream or massage. | boolean | – | `true`, `false` | **read/write** |
-| 31 | `lightsColorChange` | Trigger for changing the RGB light colour | toggle (trigger) | – | – | write-only |
+| 30 | `aux<N>State` | State of auxiliary output N. The set of outputs depends on the switchboard type (`aux0State` … `aux7State` on CPC2 and others, `aux1State` … `aux13State` on IPC1 and others). What the output controls is set by the `aux<N>Output` parameter. Not every output can be switched directly, see ¹. | boolean | – | `true`, `false` | read-only / **read/write** ¹ || 31 | `lightsColorChange` | Trigger for changing the RGB light colour | toggle (trigger) | – | – | write-only |
 | 32 | `protectionRCDState` | RCD protection active | boolean | – | `true`, `false` | read-only |
+
+¹ `aux<N>State` is writable (`$desired.aux<N>State`) only for outputs of the type `lighting`, `lightingRgb`, `attraction`, `auxiliaryCirculationPump`, `bubbleBath`, `fountain`, `jetStream` (IPC1 only) and `massage`. For the other output types the state is only reported and the equipment is controlled by other means:
+- `mainPump` – controlled by `filtrationState` and further device logic,
+- `heater`, `heaterContact` – controlled by `targetTemp` / `targetHeaterMode` and the heating regulation
 
 The ranges shown above represent typical operating ranges rather than strict API limits. Values outside these ranges may still be reported by the Pool Controller.
 
