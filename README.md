@@ -74,19 +74,42 @@ The session token may expire. If a call fails because the session is no longer v
 
 ## Shadow parameters
 
-| # | Shadow key | Description | Unit | Typical operating range / values | Access |
-| --- | --- | --- | --- | --- | --- |
-| 1 | `poolTemp` | Current pool water temperature | °C | 10–40 | read-only |
-| 2 | `targetTemp` | Target pool water temperature | °C | 10–40 | **read/write** |
-| 3 | `pH` | Current pool water pH level | pH | 7–8 | read-only |
-| 4 | `orp` | Oxidation-reduction potential (ORP) of the pool water | mV | 100–800 | read-only |
-| 5 | `freeCl` | Free chlorine concentration | ppm | 0.0–2.0 | read-only |
-| 6 | `heaterStatePercent` | Current heater/cooler output level | % | 0–100 | read-only |
-| 7 | `heaterMode` | Current heater operating mode | enum | `HEATING`, `COOLING` | read-only |
-| 8 | `filtrationState` | Filtration pump state | boolean | `true`, `false` | **read/write** |
-| 9 | `poolWaterLevel` | Current pool water level | m | 0–1.5 | read-only |
-| 10 | `dosingPumpARemainingAgentVolume` | Remaining volume of pH-reducing agent | L | 0–60 | **read/write** |
-| 11 | `dosingPumpBRemainingAgentVolume` | Remaining volume of chlorinating agent (NaClO) | L | 0–60 | **read/write** |
+## Shadow parameters
+
+| # | Shadow key | Description | Data type | Unit | Typical operating range / values | Access |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | `poolTemp` | Current pool water temperature | number | °C | 10–40 | read-only |
+| 2 | `targetTemp` | Target pool water temperature | number | °C | 10–40 (step 0.5) | **read/write** |
+| 3 | `pH` | Current pool water pH level | number | pH | 7–8 | read-only |
+| 4 | `orp` | Oxidation-reduction potential (ORP) of the pool water | number | mV | 100–800 | read-only |
+| 5 | `freeCl` | Free chlorine concentration | number | ppm | 0.0–2.0 | read-only |
+| 6 | `heaterStatePercent` | Current heater/cooler output level | number | % | 0–100 | read-only |
+| 7 | `heaterMode` | Current heater operating mode (the dashboard uses it only in icon/label rules, not as a tile value) | enum | – | `HEATING`, `COOLING`, `STANDBY` | read-only |
+| 8 | `filtrationState` | Filtration pump state | boolean | – | `true`, `false` | **read/write** |
+| 9 | `poolWaterLevel` | Current pool water level | number | m | 0–1.5 | read-only |
+| 10 | `dosingPumpARemainingAgentVolume` | Remaining volume of pH-reducing agent | number | L | 0–60 | **read/write** |
+| 11 | `dosingPumpBRemainingAgentVolume` | Remaining volume of chlorinating agent (NaClO) | number | L | 0–60 | **read/write** |
+| 12 | `dosingPumpCRemainingAgentVolume` | Remaining volume of agent in dosing pump C | number | L | 0–60 | **read/write** |
+| 13 | `dosingPumpDRemainingAgentVolume` | Remaining volume of agent in dosing pump D | number | L | 0–60 | **read/write** |
+| 14 | `ambientTemperature` | Ambient air temperature (shown only with the `displayAmbientTemperature` eligibility) | number | °C | – | read-only |
+| 15 | `temperatureIntoPool` | Return water temperature (water flowing into the pool) | number | °C | – | read-only |
+| 16 | `outsideTemp` | Outside air temperature | number | °C | – | read-only |
+| 17 | `targetpHLevel` | Target pH level | number | pH | 7–8 (step 0.05) | **read/write** |
+| 18 | `targetORPLevel` | Target ORP level | number | mV | 100–800 (step 10) | **read/write** |
+| 19 | `targetFreeClLevel` | Target free chlorine concentration | number | ppm | 0–2 (step 0.05) | **read/write** |
+| 20 | `dissolvedOxygen` | Dissolved oxygen (unit is not defined in the template) | number | – | – | read-only |
+| 21 | `tankWaterLevel` | Current water level in the balancing tank (the UI shows it in cm) | number | m | – | read-only |
+| 22 | `salinity` | Current water salinity | number | % | 0.1–1.2 | read-only |
+| 23 | `chlorinatorOutputClPercent` | Current chlorinator output level | number | % | 0–100 | read-only |
+| 24 | `targetChlorinatorOutputClPercent` | Target chlorinator output level | number | % | 0–100 (step 10) | write-only ¹ |
+| 25 | `chlorinationMethod` | Chlorination method | enum | – | `NACLO`, `CHLORINATOR`, `NACLO_AND_CHLORINATOR` | **read/write** |
+| 26 | `targetHeaterMode` | Requested heater operating mode | enum | – | `HEATING`, `DISABLED`, `COOLING` *(only in some configurations)*, `AUTO` *(only in some configurations)* | **read/write** |
+| 27 | `startCoolingTemp` | Water temperature at which cooling starts | number | °C | 20–36 (step 0.5) | **read/write** |
+| 28 | `heaterMaxPowerLevel` | Maximum heater power level | enum | – | `SILENT`, `NORMAL`, `BOOST` *(only in some configurations)* | **read/write** |
+| 29 | `waterRefill` | Automatic water refill | enum | – | `DISABLED`, `ENABLED` | **read/write** |
+| 30 | `aux0State` … `aux7State` | State of auxiliary output 0–7 (8 keys). The tile label depends on the output type: lighting, RGB lighting, attraction, auxiliary circulation pump, bubble bath, fountain, jet stream or massage. | boolean | – | `true`, `false` | **read/write** |
+| 31 | `lightsColorChange` | Trigger for changing the RGB light colour | toggle (trigger) | – | – | write-only |
+| 32 | `protectionRCDState` | RCD protection active | boolean | – | `true`, `false` | read-only |
 
 The ranges shown above represent typical operating ranges rather than strict API limits. Values outside these ranges may still be reported by the Pool Controller.
 
