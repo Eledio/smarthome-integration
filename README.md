@@ -68,11 +68,43 @@ Example response:
 
 The second element of the `result` array contains the login response. The `ubus_rpc_session` value is the session token that must be used in subsequent ubus RPC calls.
 
-The first element of the `result` array is the ubus status code. A value of `0` indicates a successful call.
+The first element of the `result` array is the ubus status code. A value of `0` indicates a successful call. Any other value indicates an error. A list of error codes is not available.
 
-The session token may expire. If a call fails because the session is no longer valid, authenticate again and obtain a new session token.
+### Session timeout
 
-## Shadow parameters
+The session token expires when it is not used for the configured time. The default timeout is 300 seconds (5 minutes). A different timeout can be requested by adding the optional `timeout` parameter (in seconds) to the login call:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 40,
+  "method": "call",
+  "params": [
+    "00000000000000000000000000000000",
+    "session",
+    "login",
+    {
+      "username": "eledio",
+      "password": "password",
+      "timeout": 3600
+    }
+  ]
+}
+```
+
+The example above creates a session that is valid for 3600 seconds (1 hour).
+
+Every API request made with the session resets the timeout countdown. For example, with a timeout of 5 minutes and an API request every 3 minutes, the session never expires.
+
+The session is stored only in the memory of the Pool Controller and does not survive a restart of the device. A session therefore cannot be made permanent: after a restart, a new login is always required.
+
+If a call fails because the session has expired or is no longer valid, authenticate again and obtain a new session token.
+
+## Request rate
+
+There is no rate limit on API requests. The values in the shadow are refreshed once per second, so polling more often than every second brings no new data.
+
+Sending API requests more often than every 5 seconds is not recommended, because it may overload the Pool Controller.
 
 ## Shadow parameters
 
@@ -101,22 +133,50 @@ The session token may expire. If a call fails because the session is no longer v
 | 21 | `tankWaterLevel` | Current water level in the balancing tank (the UI shows it in cm) | number | m | – | read-only |
 | 22 | `salinity` | Current water salinity | number | % | 0.1–1.2 | read-only |
 | 23 | `chlorinatorOutputClPercent` | Current chlorinator output level | number | % | 0–100 | read-only |
-| 24 | `targetChlorinatorOutputClPercent` | Target chlorinator output level | number | % | 0–100 (step 10) | write-only ¹ |
+| 24 | `targetChlorinatorOutputClPercent` | Target chlorinator output level | number | % | 0–100 (step 10) | **read/write** |
 | 25 | `chlorinationMethod` | Chlorination method | enum | – | `NACLO`, `CHLORINATOR`, `NACLO_AND_CHLORINATOR` | **read/write** |
 | 26 | `targetHeaterMode` | Requested heater operating mode | enum | – | `HEATING`, `DISABLED`, `COOLING` *(only in some configurations)*, `AUTO` *(only in some configurations)* | **read/write** |
 | 27 | `startCoolingTemp` | Water temperature at which cooling starts | number | °C | 20–36 (step 0.5) | **read/write** |
 | 28 | `heaterMaxPowerLevel` | Maximum heater power level | enum | – | `SILENT`, `NORMAL`, `BOOST` *(only in some configurations)* | **read/write** |
 | 29 | `waterRefill` | Automatic water refill | enum | – | `DISABLED`, `ENABLED` | **read/write** |
-| 30 | `aux<N>State` | State of auxiliary output N. The set of outputs depends on the switchboard type (`aux0State` … `aux7State` on CPC2 and others, `aux1State` … `aux13State` on IPC1 and others). What the output controls is set by the `aux<N>Output` parameter. Not every output can be switched directly, see ¹. | boolean | – | `true`, `false` | read-only / **read/write** ¹ || 31 | `lightsColorChange` | Trigger for changing the RGB light colour | toggle (trigger) | – | – | write-only |
+| 30 | `aux<N>State` | State of auxiliary output N. The set of outputs depends on the switchboard type (`aux0State` … `aux7State` on CPC2 and others, `aux1State` … `aux13State` on IPC1 and others). What the output controls is set by the `aux<N>Output` parameter. Not every output can be switched directly, see ¹. | boolean | – | `true`, `false` | read-only / **read/write** ¹ |
+| 31 | `lightsColorChange` | Trigger for changing the RGB light colour | toggle (trigger) | – | – | write-only |
 | 32 | `protectionRCDState` | RCD protection active | boolean | – | `true`, `false` | read-only |
 
-¹ `aux<N>State` is writable (`$desired.aux<N>State`) only for outputs of the type `lighting`, `lightingRgb`, `attraction`, `auxiliaryCirculationPump`, `bubbleBath`, `fountain`, `jetStream` (IPC1 only) and `massage`. For the other output types the state is only reported and the equipment is controlled by other means:
+¹ `aux<N>State` is writable (`$desired.aux<N>State`) only for outputs of the type `lighting`, `lightingRgb`, `attraction`, `auxiliaryCirculationPump`, `bubbleBath`, `fountain`, `jetStream` and `massage`. For the other output types the state is only reported and the equipment is controlled by other means:
 - `mainPump` – controlled by `filtrationState` and further device logic,
-- `heater`, `heaterContact` – controlled by `targetTemp` / `targetHeaterMode` and the heating regulation
+- `heater`, `heaterContact` – controlled by `targetTemp` / `targetHeaterMode` and the heating regulation,
+- other output types (for example `uvLamp`) – the state is only reported.
+
+The function of each auxiliary output (for example light, jet stream or fountain) is part of the configuration of the specific installation and differs between devices. To control a particular function, the client must therefore know which output it is connected to. The function cannot be derived from the number of the output.
 
 The ranges shown above represent typical operating ranges rather than strict API limits. Values outside these ranges may still be reported by the Pool Controller.
 
 The actual availability and valid values of individual parameters may depend on the Pool Controller configuration and installed peripherals.
+
+## Common functions
+
+| Function | Shadow keys |
+| --- | --- |
+| Pool light | `aux<N>State` of the output configured as `lighting` or `lightingRgb` (the output number depends on the installation); the colour of an RGB light is changed with `lightsColorChange` |
+| Heating on/off | `targetHeaterMode` (`HEATING` = on, `DISABLED` = off); target temperature `targetTemp` |
+| Switched 230 V outputs (sockets) | The sockets in the switchboard are terminals of the auxiliary outputs. Which output is wired to which socket depends on the installation. The outputs are controlled with `aux<N>State`, see ¹ for the output types that can be switched |
+| Filtration pump on/off | `filtrationState` |
+| UV lamp | state only (read-only), as `aux<N>State` of an output configured as `uvLamp` |
+| Salt electrolysis | `salinity`, `chlorinatorOutputClPercent`, `targetChlorinatorOutputClPercent` |
+| Water level | `poolWaterLevel`, `tankWaterLevel`, `waterRefill` |
+| Temperatures | `poolTemp`, `temperatureIntoPool`, `outsideTemp`, `ambientTemperature` |
+
+## Functions not available through the API
+
+The following functions are intentionally not exposed:
+
+* **Enabling and disabling pH and chlorine regulation.** The dosing control logic uses self-learning mechanisms that would be disturbed if an external system interrupted the dosing. The target values (`targetpHLevel`, `targetORPLevel`, `targetFreeClLevel`) can be set.
+* **Time schedules.** The configuration of schedules must follow specific rules of the control logic, and its correct operation cannot be guaranteed if schedules are changed from outside.
+
+The following functions are not available yet:
+
+* **Alarms and error states.** The API does not provide access to them.
 
 ## Get the Thing Shadow
 
