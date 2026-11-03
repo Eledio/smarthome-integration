@@ -111,7 +111,7 @@ Sending API requests more often than every 5 seconds is not recommended, because
 | # | Shadow key | Description | Data type | Unit | Typical operating range / values | Access |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | `poolTemp` | Current pool water temperature | number | °C | 10–40 | read-only |
-| 2 | `targetTemp` | Target pool water temperature | number | °C | 10–40 (step 0.5) | **read/write** |
+| 2 | `targetTemp` | Target pool water temperature | number | °C | 0–40 (step 0.5) | **read/write** |
 | 3 | `pH` | Current pool water pH level | number | pH | 7–8 | read-only |
 | 4 | `orp` | Oxidation-reduction potential (ORP) of the pool water | number | mV | 100–800 | read-only |
 | 5 | `freeCl` | Free chlorine concentration | number | ppm | 0.0–2.0 | read-only |
@@ -143,10 +143,9 @@ Sending API requests more often than every 5 seconds is not recommended, because
 | 31 | `lightsColorChange` | Trigger for changing the RGB light colour | toggle (trigger) | – | – | write-only |
 | 32 | `protectionRCDState` | RCD protection active | boolean | – | `true`, `false` | read-only |
 
-¹ `aux<N>State` is writable (`$desired.aux<N>State`) only for outputs of the type `lighting`, `lightingRgb`, `attraction`, `auxiliaryCirculationPump`, `bubbleBath`, `fountain`, `jetStream` and `massage`. For the other output types the state is only reported and the equipment is controlled by other means:
+¹ `aux<N>State` is writable (`$desired.aux<N>State`) only for outputs of the type `lighting`, `lightingRgb`, `attraction`, `auxiliaryCirculationPump`, `bubbleBath`, `fountain`, `jetStream` and `massage`. For the other output types the state is only reported (if necessary) and the equipment is controlled by other means:
 - `mainPump` – controlled by `filtrationState` and further device logic,
 - `heater`, `heaterContact` – controlled by `targetTemp` / `targetHeaterMode` and the heating regulation,
-- other output types (for example `uvLamp`) – the state is only reported.
 
 The function of each auxiliary output (for example light, jet stream or fountain) is part of the configuration of the specific installation and differs between devices. To control a particular function, the client must therefore know which output it is connected to. The function cannot be derived from the number of the output.
 
@@ -162,7 +161,6 @@ The actual availability and valid values of individual parameters may depend on 
 | Heating on/off | `targetHeaterMode` (`HEATING` = on, `DISABLED` = off); target temperature `targetTemp` |
 | Switched 230 V outputs (sockets) | The sockets in the switchboard are terminals of the auxiliary outputs. Which output is wired to which socket depends on the installation. The outputs are controlled with `aux<N>State`, see ¹ for the output types that can be switched |
 | Filtration pump on/off | `filtrationState` |
-| UV lamp | state only (read-only), as `aux<N>State` of an output configured as `uvLamp` |
 | Salt electrolysis | `salinity`, `chlorinatorOutputClPercent`, `targetChlorinatorOutputClPercent` |
 | Water level | `poolWaterLevel`, `tankWaterLevel`, `waterRefill` |
 | Temperatures | `poolTemp`, `temperatureIntoPool`, `outsideTemp`, `ambientTemperature` |
